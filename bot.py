@@ -1,11 +1,11 @@
+import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN = "ВАШ_ТОКЕН_ТУТ"
-
+TOKEN = os.environ.get("TOKEN", "")
 MANAGER = "https://t.me/OlenaMatviienko"
 
 TEXTS = {
@@ -27,10 +27,7 @@ def main_menu():
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Вітаємо у Kids UA Camp!\n\n"
-        "Літній табір для українських дітей в Анталії ☀️\n"
-        "Діти 6-15 років | Літо 2026\n\n"
-        "Оберіть що вас цікавить:",
+        "👋 Вітаємо у Kids UA Camp!\n\nЛітній табір для українських дітей в Анталії ☀️\nДіти 6-15 років | Літо 2026\n\nОберіть що вас цікавить:",
         reply_markup=main_menu(),
         parse_mode="Markdown"
     )
@@ -38,34 +35,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
-    text = TEXTS.get(query.data, "Інформація скоро буде!")
-    
-    keyboard = [[InlineKeyboardButton("⬅️ Назад", callback_data="back")]]
-    await query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="Markdown"
-    )
+    if query.data == "back":
+        await query.edit_message_text(
+            "👋 Вітаємо у Kids UA Camp!\n\nЛітній табір для українських дітей в Анталії ☀️\nДіти 6-15 років | Літо 2026\n\nОберіть що вас цікавить:",
+            reply_markup=main_menu(),
+            parse_mode="Markdown"
+        )
+    else:
+        text = TEXTS.get(query.data, "Інформація скоро буде!")
+        keyboard = [[InlineKeyboardButton("⬅️ Назад", callback_data="back")]]
+        await query.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown"
+        )
 
-async def back(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text(
-        "👋 Вітаємо у Kids UA Camp!\n\n"
-        "Літній табір для українських дітей в Анталії ☀️\n"
-        "Діти 6-15 років | Літо 2026\n\n"
-        "Оберіть що вас цікавить:",
-        reply_markup=main_menu(),
-        parse_mode="Markdown"
-    )
-
-def main():
+async def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(back, pattern="^back$"))
     app.add_handler(CallbackQueryHandler(button))
-    app.run_polling()
+    await app.run_polling()
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
