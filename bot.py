@@ -6,7 +6,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 logging.basicConfig(level=logging.INFO)
 
 TOKEN = os.environ.get("TOKEN", "")
-MANAGER = "https://t.me/OlenaMatviienko"
+MANAGER = "https://t.me/kids_ua_camp"
 
 TEXTS = {
     "program": (
